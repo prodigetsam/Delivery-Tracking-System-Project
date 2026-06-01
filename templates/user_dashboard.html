@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='mystyle.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <h1>User Dashboard</h1>
+
+    <p>Welcome {{ session['first_name'] }} {{ session['last_name'] }}</p>
+
+    <div class="dashboard-card">
+
+        <h3>Parcel Management</h3>
+
+        <a href="#">Track Parcel</a><br><br>
+
+        <a href="#">My Orders</a><br><br>
+
+        <a href="#">Parcel History</a>
+
+    </div>
+
+    <br>
+
+    <a class="logout-btn" href="{{ url_for('logout') }}">
+        Logout
+    </a>
+
+</div>
+
+</body>
+</html>

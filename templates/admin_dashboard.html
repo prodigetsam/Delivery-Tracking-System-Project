@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='mystyle.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <h1>Admin Dashboard</h1>
+
+    <p>Welcome {{ session['first_name'] }} {{ session['last_name'] }}</p>
+
+    <div class="dashboard-card">
+
+        <h3>Administration</h3>
+
+        <a href="#">View All Parcels</a><br><br>
+
+        <a href="#">Manage Users</a><br><br>
+
+        <a href="#">Update Parcel Status</a><br><br>
+
+        <a href="#">Reports</a>
+
+    </div>
+
+    <br>
+
+    <a class="logout-btn" href="{{ url_for('logout') }}">
+        Logout
+    </a>
+
+</div>
+
+</body>
+</html>

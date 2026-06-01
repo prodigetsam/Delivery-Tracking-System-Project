@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcel Delivery Tracking System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <script src="{{ url_for('static', filename='mainJSscript.js') }}"></script>
+</head>
+<body>
+    <h1>Parcel Tracking System</h1>
+    <h2>Welcome to the Parcel Tracking System!</h2>
+    <p>Please fill in the form below to create an account.</p>
+    
+    <form action="/registration" method="post">        
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required><br><br>
+        
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required><br><br>
+        
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        </select><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <label for="confirm_password">Confirm Password:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required><br><br>
+        
+        <p class="registrationmessage" id="demo"></p>
+        <input type="submit" onclick="return passwordConfirmation();" value="Register">
+    </form>
+    
+    <p><a href="{{ url_for('login_page') }}">Already have an account? Login here.</a></p>
+</body>
+</html>
