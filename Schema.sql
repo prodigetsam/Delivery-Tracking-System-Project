@@ -1,3 +1,6 @@
+-- Create the database
+CREATE DATABASE IF NOT EXISTS parcel_delivery_system;
+USE parcel_delivery_system;
 -- 1. Users table
 CREATE TABLE user_credentials (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -15,7 +18,7 @@ CREATE TABLE parcels (
     sender_id INT NOT NULL,
     item_name VARCHAR(100) NOT NULL,
     tracking_number VARCHAR(50) UNIQUE NOT NULL,
-    delivary_address TEXT NOT NULL,
+    delivery_address TEXT NOT NULL,
     status VARCHAR(50) DEFAULT 'On Hold',
     FOREIGN KEY (sender_id) REFERENCES user_credentials(id) ON DELETE CASCADE
 );
