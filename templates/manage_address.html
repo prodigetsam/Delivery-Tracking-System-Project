@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Addresses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+</head>
+<body>
+
+<div class="services-container">
+
+    <h1>Manage Addresses</h1>
+
+    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
+        
+        <h3>Add New Address</h3>
+        <form action="{{ url_for('manage_address') }}" method="POST">
+            
+            <label for="address_label">Address Label</label><br>
+            <input type="text" 
+                   id="address_label" 
+                   name="address_label" 
+                   placeholder="e.g., Home, Velvet Suites, Strathmore Campus" 
+                   required 
+                   style="width: 100%; margin-top: 5px;"><br><br>
+
+            <label for="full_address">Full Address</label><br>
+            <textarea id="full_address" 
+                      name="full_address" 
+                      rows="3" 
+                      placeholder="Enter the complete address" 
+                      required 
+                      style="width: 100%; margin-top: 5px;"></textarea><br><br>
+
+            <button type="submit" style="width: 100%;">Save Address</button>
+
+        </form>
+
+    </div>
+
+    <br>
+
+    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
+        <h3>Saved Addresses</h3>
+        
+        {% if addresses %}
+            <ul>
+            {% for addr in addresses %}
+                <li style="margin-bottom: 10px;">
+                    <strong>{{ addr.address_label }}</strong>: {{ addr.full_address }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no saved addresses yet.</p>
+        {% endif %}
+    </div>
+
+    <br>
+    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
+
+</div>
+
+</body>
+</html>

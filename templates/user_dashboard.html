@@ -7,32 +7,48 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='mystyle.css') }}">
-</head>
 
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
 <body>
 
 <div class="dashboard-container">
 
     <h1>User Dashboard</h1>
 
-    <p>Welcome {{ session['first_name'] }} {{ session['last_name'] }}</p>
+    <p>
+        Welcome,
+        <strong>{{ session['first_name'] }} {{ session['last_name'] }}</strong>
+    </p>
 
-    <div class="dashboard-card">
+    <div class="dashboard-cards">
 
-        <h3>Parcel Management</h3>
+        <div class="dashboard-card">
+            <i class="fas fa-user"></i>
+            <h3>Profile</h3>
+            <p>View and manage your account information.</p>
+            <a href="{{ url_for('profile') }}">Open</a>
+        </div>
 
-        <a href="#">Track Parcel</a><br><br>
+        <div class="dashboard-card">
+            <i class="fas fa-box"></i>
+            <h3>Parcel Services</h3>
+            <p>Request deliveries, manage addresses, and view your parcels.</p>
+            <a href="{{ url_for('parcel_services') }}">Open</a>
+        </div>
 
-        <a href="#">My Orders</a><br><br>
-
-        <a href="#">Parcel History</a>
+        <div class="dashboard-card">
+            <i class="fas fa-search"></i>
+            <h3>Tracking</h3>
+            <p>Track parcels and view the history of specific parcels.</p>
+            <a href="{{ url_for('tracking') }}">Open</a>
+        </div>
 
     </div>
 
-    <br>
-
     <a class="logout-btn" href="{{ url_for('logout') }}">
-        Logout
+        <i class="fas fa-sign-out-alt"></i> Logout
     </a>
 
 </div>

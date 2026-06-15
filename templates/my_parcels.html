@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Parcels</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+</head>
+<body>
+
+<div class="services-container">
+    <h1>My Parcels</h1>
+
+    <div class="service-card" style="max-width: 600px; margin: 0 auto; text-align: left;">
+        {% if parcels %}
+            <ul style="list-style-type: none; padding: 0;">
+            {% for parcel in parcels %}
+                <li style="border-bottom: 1px solid #ddd; padding: 15px 0;">
+                    <strong>Item:</strong> {{ parcel.item_name }}<br>
+                    <strong>Tracking Number:</strong> {{ parcel.tracking_number }}<br>
+                    <strong>Destination:</strong> {{ parcel.delivery_address }}<br>
+                    <strong>Status:</strong> {{ parcel.status }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no active parcel requests.</p>
+        {% endif %}
+    </div>
+
+    <br>
+    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
+</div>
+
+</body>
+</html>

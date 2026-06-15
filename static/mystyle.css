@@ -1,133 +1,71 @@
-
- * {
+/* General Layout */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-    background: #f4f6f9;
-    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
 }
 
-form {
-    background: white;
+.services-container {
+    background: #ffffff;
     padding: 30px;
-    width: 400px;
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
-}
-
-h1 {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 500px;
     text-align: center;
-    color: #1f4e79;
-    margin-bottom: 10px;
 }
 
-h2 {
-    text-align: center;
-    color: #444;
-    margin-bottom: 15px;
-}
+h1 { color: #333; margin-bottom: 20px; }
 
-p {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #555;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #333;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select {
+/* Forms */
+form { text-align: left; }
+label { font-weight: bold; color: #555; }
+input, textarea, select {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    margin-bottom: 15px;
+    margin: 8px 0 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Ensures padding doesn't break width */
 }
 
-input[type="submit"] {
-    width: 100%;
-    background: #1f4e79;
+/* Buttons */
+button {
+    background-color: #007bff;
     color: white;
-    border: none;
     padding: 12px;
-    border-radius: 6px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
     cursor: pointer;
     font-size: 16px;
-    transition: 0.3s;
+    transition: background 0.3s;
 }
 
-input[type="submit"]:hover {
-    background: #163b5c;
-}
+button:hover { background-color: #0056b3; }
 
-a {
-    color: #1f4e79;
-    text-decoration: none;
-    display: block;
-    text-align: center;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-.registrationmessage {
-    text-align: center;
-    font-weight: bold;
+/* Cards/Sections */
+.service-card {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 8px;
+    background: #f9f9f9;
     margin-bottom: 15px;
 }
 
-.success {
-    color: green;
-}
-
-.error {
-    color: red;
-}
-.dashboard-container {
-    width: 80%;
-    max-width: 1000px;
-    margin: 50px auto;
-    text-align: center;
-}
-
-.dashboard-card {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.15);
-}
-
-.dashboard-card a {
-    display: inline-block;
+/* Links */
+a {
+    color: #007bff;
     text-decoration: none;
-    color: #1f4e79;
-    font-weight: bold;
+    font-size: 14px;
 }
 
-.logout-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #c0392b;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
+a:hover { text-decoration: underline; }
 
-.logout-btn:hover {
-    background: #a93226;
-}
+/* Alerts / Messages */
+p.error { color: red; font-size: 14px; }

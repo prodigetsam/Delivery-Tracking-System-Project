@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Delivery</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+</head>
+<body>
+
+<div class="services-container">
+
+    <h1>Request a Delivery</h1>
+
+    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
+        
+        <form action="{{ url_for('request_delivery') }}" method="POST">
+
+            <label for="item_name">Item Name / Description</label><br>
+            <input type="text" 
+                   id="item_name" 
+                   name="item_name" 
+                   placeholder="Enter item details" 
+                   required 
+                   style="width: 100%; margin-top: 5px;"><br><br>
+
+            <label for="delivery_address">Delivery Address</label><br>
+            <textarea id="delivery_address" 
+                      name="delivery_address" 
+                      rows="4" 
+                      placeholder="Enter the full destination address" 
+                      required 
+                      style="width: 100%; margin-top: 5px;"></textarea><br><br>
+
+            <button type="submit" style="width: 100%;">Submit Request</button>
+
+        </form>
+
+    </div>
+
+    <br>
+
+    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
+
+</div>
+
+</body>
+</html>

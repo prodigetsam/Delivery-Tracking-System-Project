@@ -7,34 +7,60 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='mystyle.css') }}">
-</head>
 
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
 <body>
 
 <div class="dashboard-container">
 
     <h1>Admin Dashboard</h1>
 
-    <p>Welcome {{ session['first_name'] }} {{ session['last_name'] }}</p>
+    <p>
+        Welcome,
+        <strong>{{ session['first_name'] }} {{ session['last_name'] }}</strong>
+    </p>
 
-    <div class="dashboard-card">
+    <div class="dashboard-cards">
 
-        <h3>Administration</h3>
+        <div class="dashboard-card">
+            <i class="fas fa-users"></i>
+            <h3>User Management</h3>
 
-        <a href="#">View All Parcels</a><br><br>
+            <a href="#">View Users</a><br>
+            <a href="#">Search Users</a><br>
+            <a href="#">Edit User Details</a><br>
+            <a href="#">Delete Users</a><br>
+            <a href="#">Change Delivery Address</a>
+        </div>
 
-        <a href="#">Manage Users</a><br><br>
+        <div class="dashboard-card">
+            <i class="fas fa-box"></i>
+            <h3>Parcel Management</h3>
 
-        <a href="#">Update Parcel Status</a><br><br>
+            <a href="#">View Parcels</a><br>
+            <a href="#">Search Parcels</a><br>
+            <a href="#">Create Parcel</a><br>
+            <a href="#">Edit Parcel Information</a><br>
+            <a href="#">Delete Parcels</a><br>
+            <a href="#">Change Parcel Status</a>
+        </div>
 
-        <a href="#">Reports</a>
+        <div class="dashboard-card">
+            <i class="fas fa-chart-bar"></i>
+            <h3>Reports</h3>
+
+            <p>Total Parcels: {{ total_parcels }}</p>
+            <p>Delivered Parcels: {{ delivered_parcels }}</p>
+            <p>Pending Parcels: {{ pending_parcels }}</p>
+            <p>Cancelled Parcels: {{ cancelled_parcels }}</p>
+        </div>
 
     </div>
 
-    <br>
-
     <a class="logout-btn" href="{{ url_for('logout') }}">
-        Logout
+        <i class="fas fa-sign-out-alt"></i> Logout
     </a>
 
 </div>
