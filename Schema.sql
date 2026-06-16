@@ -1,6 +1,6 @@
 -- Create the database
-CREATE DATABASE IF NOT EXISTS parcel_delivery_system;
-USE parcel_delivery_system;
+CREATE DATABASE IF NOT EXISTS delivery_tracking_system;
+USE delivery_tracking_system;
 -- 1. Users table
 CREATE TABLE user_credentials (
     id INT AUTO_INCREMENT PRIMARY KEY,
