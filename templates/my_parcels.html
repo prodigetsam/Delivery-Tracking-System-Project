@@ -5,31 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Parcels</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
 </head>
 <body>
 
-<div class="services-container">
-    <h1>My Parcels</h1>
+<div class="profile-container">
+    <h1>My Requested Parcels</h1>
+    <p>Track the status of the items you have requested for delivery.</p>
 
-    <div class="service-card" style="max-width: 600px; margin: 0 auto; text-align: left;">
-        {% if parcels %}
-            <ul style="list-style-type: none; padding: 0;">
-            {% for parcel in parcels %}
-                <li style="border-bottom: 1px solid #ddd; padding: 15px 0;">
-                    <strong>Item:</strong> {{ parcel.item_name }}<br>
-                    <strong>Tracking Number:</strong> {{ parcel.tracking_number }}<br>
-                    <strong>Destination:</strong> {{ parcel.delivery_address }}<br>
-                    <strong>Status:</strong> {{ parcel.status }}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>You have no active parcel requests.</p>
-        {% endif %}
+    <div style="margin-bottom: 25px; text-align: left;">
+        <a href="{{ url_for('parcel_services') }}">
+            <i class="fas fa-arrow-left"></i> Back to Services
+        </a>
     </div>
 
-    <br>
-    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
+    <div class="parcel-grid">
+        {% for parcel in parcels %}
+            <div class="parcel-card">
+                <div>
+                    <span class="status-badge">
+                        <i class="fas fa-box"></i> {{ parcel.status }}
+                    </span>
+                    
+                    <h3>{{ parcel.item_name }}</h3>
+                    <div class="parcel-price">Price: KES {{ parcel.price }}</div>
+                    <p class="parcel-desc">{{ parcel.description }}</p>
+                </div>
+                
+                <div class="tracking-info">
+                    <p><strong>Tracking No:</strong> {{ parcel.tracking_number }}</p>
+                    <p><strong>Destination:</strong> {{ parcel.delivery_address }}</p>
+                </div>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 30px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
+                <i class="fas fa-box-open" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
+                <p style="color: #666; font-size: 1.1rem;">You have no parcel requests.</p>
+                <a href="{{ url_for('request_delivery') }}" class="btn" style="margin-top: 15px; display: inline-block;">
+                    Browse Inventory
+                </a>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 </body>

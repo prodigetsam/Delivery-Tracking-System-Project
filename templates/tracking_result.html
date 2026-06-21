@@ -8,13 +8,39 @@
 <body>
 <div class="services-container">
     <h1>Tracking Result</h1>
+    
     <div class="service-card">
         <p><strong>Tracking Number:</strong> {{ parcel.tracking_number }}</p>
-        <p><strong>Item:</strong> {{ parcel.item_name }}</p>
+        <p><strong>Item:</strong> {{ parcel.item_name }} ({{parcel.description}})</p>
+        <p><strong>Price:</strong> KES {{ parcel.price }}</p>
         <p><strong>Status:</strong> {{ parcel.status }}</p>
+        <p><strong>Current Location:</strong> {{ parcel.current_location }}</p>
+        <p><strong>Last Updated:</strong> {% if parcel.history %}{{ parcel.history[0].updated_at }}{% else %}Just now{% endif %}</p>
     </div>
+    
     <br>
-    <a href="{{ url_for('tracking') }}">Back to Tracking</a>
+    
+    <h2>Shipment Journey Timeline</h2>
+    <div class="service-card" style="padding: 20px;">
+        {% if parcel.history %}
+            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                {% for step in parcel.history %}
+                <li style="margin-bottom: 18px; border-left: 2px solid #5b2c90; padding-left: 15px; position: relative;">
+                    <strong style="color: #5b2c90; font-size: 1.05em;">{{ step.status }}</strong> — <span>{{ step.location }}</span><br>
+                    <span style="font-size: 0.9em; color: #555; display: block; margin: 2px 0;">{{ step.remarks }}</span>
+                    <small style="font-size: 0.8em; color: #888;">{{ step.updated_at }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: #777; margin: 0;">No travel history checkpoints recorded yet. Package is currently processing at the origin facility.</p>
+        {% endif %}
+    </div>
+    
+    <br>
+    <a href="{{ url_for('tracking') }}" style="text-decoration: none; font-weight: bold; color: #5b2c90;">
+        <i class="fas fa-arrow-left"></i> Back to Tracking search
+    </a>
 </div>
 </body>
 </html>

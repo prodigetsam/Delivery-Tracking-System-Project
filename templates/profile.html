@@ -7,6 +7,7 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -16,74 +17,67 @@
 
     <div class="profile-sections">
 
-        <!-- View Profile -->
         <div class="profile-card">
             <h3>Profile Information</h3>
 
             <p><strong>First Name:</strong> {{ user.first_name }}</p>
             <p><strong>Last Name:</strong> {{ user.last_name }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h4 style="margin-top: 0; color: #5b2c90;">
+                <i class="fas fa-chart-line"></i> Activity Summary
+            </h4>
+            <div style="display: flex; gap: 20px;">
+                <div>
+                    <p style="margin: 0; font-size: 0.85em; color: #666;">Total Shipments</p>
+                    <strong style="font-size: 1.1em;">{{ activity.total_orders }}</strong>
+                </div>
+                <div>
+                    <p style="margin: 0; font-size: 0.85em; color: #666;">Latest Status</p>
+                    <strong style="font-size: 1.1em;">
+                        {{ activity.recent_status if activity.recent_status else 'No active shipments' }}
+                    </strong>
+                </div>
+            </div>
         </div>
 
-        <!-- Update Profile -->
         <div class="profile-card">
             <h3>Update Profile</h3>
-
             <form action="{{ url_for('update_profile') }}" method="POST">
-
                 <label>First Name</label><br>
-                <input type="text"
-                       name="first_name"
-                       value="{{ user.first_name }}"
-                       required><br><br>
+                <input type="text" name="first_name" value="{{ user.first_name }}" required><br><br>
 
                 <label>Last Name</label><br>
-                <input type="text"
-                       name="last_name"
-                       value="{{ user.last_name }}"
-                       required><br><br>
+                <input type="text" name="last_name" value="{{ user.last_name }}" required><br><br>
 
                 <label>Email</label><br>
-                <input type="email"
-                       name="email"
-                       value="{{ user.email }}"
-                       required><br><br>
+                <input type="email" name="email" value="{{ user.email }}" required><br><br>
 
                 <button type="submit">Save Changes</button>
-
             </form>
         </div>
 
-        <!-- Change Password -->
         <div class="profile-card">
             <h3>Change Password</h3>
-
             <form action="{{ url_for('change_password') }}" method="POST">
-
                 <label>Current Password</label><br>
-                <input type="password"
-                       name="current_password"
-                       required><br><br>
+                <input type="password" name="current_password" required><br><br>
 
                 <label>New Password</label><br>
-                <input type="password"
-                       name="new_password"
-                       required><br><br>
+                <input type="password" name="new_password" required><br><br>
 
                 <label>Confirm Password</label><br>
-                <input type="password"
-                       name="confirm_password"
-                       required><br><br>
+                <input type="password" name="confirm_password" required><br><br>
 
                 <button type="submit">Update Password</button>
-
             </form>
         </div>
 
     </div>
 
     <br>
-
     <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
 
 </div>

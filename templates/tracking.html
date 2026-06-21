@@ -15,45 +15,25 @@
 
 <div class="tracking-container">
 
-    <h1>Tracking</h1>
+    <h1>Tracking Portal</h1>
 
-    <div class="tracking-sections">
+    <div class="tracking-sections" style="display: flex; justify-content: center;">
 
-        <!-- Track Parcel -->
-        <div class="tracking-card">
+        <div class="tracking-card" style="max-width: 450px; width: 100%;">
             <i class="fas fa-search"></i>
-            <h3>Track Parcel</h3>
+            <h3>Track Parcel Shipment</h3>
+            <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Enter your tracking number to check the real-time status and complete history of your shipment.</p>
 
             <form action="{{ url_for('track_parcel') }}" method="POST">
 
-                <label>Parcel ID</label><br>
+                <label>Tracking Number</label><br>
                 <input type="text"
-                       name="parcel_id"
-                       placeholder="Enter Parcel ID"
+                       name="tracking_number"
+                       placeholder="Enter Tracking Number e.g., TRK-1234ABCD"
                        required><br><br>
 
                 <button type="submit">
-                    Track
-                </button>
-
-            </form>
-        </div>
-
-        <!-- Parcel History -->
-        <div class="tracking-card">
-            <i class="fas fa-history"></i>
-            <h3>Parcel History</h3>
-
-            <form action="{{ url_for('parcel_history') }}" method="POST">
-
-                <label>Parcel ID</label><br>
-                <input type="text"
-                       name="parcel_id"
-                       placeholder="Enter Parcel ID"
-                       required><br><br>
-
-                <button type="submit">
-                    View History
+                    Track Journey
                 </button>
 
             </form>

@@ -4,44 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Delivery</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
-<div class="services-container">
+<div class="profile-container">
+    <h1>Request Delivery</h1>
+    <p>Select from the available parcels below.</p>
 
-    <h1>Request a Delivery</h1>
-
-    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
-        
-        <form action="{{ url_for('request_delivery') }}" method="POST">
-
-            <label for="item_name">Item Name / Description</label><br>
-            <input type="text" 
-                   id="item_name" 
-                   name="item_name" 
-                   placeholder="Enter item details" 
-                   required 
-                   style="width: 100%; margin-top: 5px;"><br><br>
-
-            <label for="delivery_address">Delivery Address</label><br>
-            <textarea id="delivery_address" 
-                      name="delivery_address" 
-                      rows="4" 
-                      placeholder="Enter the full destination address" 
-                      required 
-                      style="width: 100%; margin-top: 5px;"></textarea><br><br>
-
-            <button type="submit" style="width: 100%;">Submit Request</button>
-
-        </form>
-
+    <div style="margin-bottom: 25px; text-align: left;">
+        <a href="{{ url_for('parcel_services') }}">
+            <i class="fas fa-arrow-left"></i> Back to Services
+        </a>
     </div>
 
-    <br>
-
-    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
+    <div class="parcel-grid">
+        {% for parcel in admin_parcels %}
+            <div class="parcel-card">
+                <div>
+                    <h3>{{ parcel.item_name }}</h3>
+                    <div class="parcel-price">Price: KES {{ parcel.price }}</div>
+                    <p class="parcel-desc"><h3>Description:</h3> {{ parcel.description }}</p>
+                </div>
+                
+                <form action="/request_delivery" method="POST">
+                    <input type="hidden" name="parcel_id" value="{{ parcel.id }}">
+                    <button type="submit">
+                        <i class="fas fa-paper-plane"></i> Request Delivery
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #888;">
+                <p>No available parcels for delivery currently.</p>
+            </div>
+        {% endfor %}
+    </div>
 
 </div>
 

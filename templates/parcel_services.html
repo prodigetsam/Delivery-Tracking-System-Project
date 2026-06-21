@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parcel Services</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='mystyle.css') }}">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -17,39 +14,30 @@
 
     <h1>Parcel Services</h1>
 
-    <div class="services-sections">
+    <div class="services-sections" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 250px)); gap: 20px; justify-content: center;">
 
-        <!-- Request Delivery -->
         <div class="service-card">
-            <i class="fas fa-plus-circle"></i>
+            <i class="fas fa-plus-circle" style="color: #5b2c90; font-size: 2em; margin-bottom: 10px;"></i>
             <h3>Request Delivery</h3>
-
-            <p>Create a new parcel delivery request.</p>
-
+            <p>Request a new parcel delivery.</p>
             <a href="{{ url_for('request_delivery') }}">
                 Open
             </a>
         </div>
 
-        <!-- Manage Address -->
         <div class="service-card">
-            <i class="fas fa-map-marker-alt"></i>
+            <i class="fas fa-map-marker-alt" style="color: #5b2c90; font-size: 2em; margin-bottom: 10px;"></i>
             <h3>Manage Address</h3>
-
-            <p>Add or update your delivery addresses.</p>
-
+            <p>View or update your delivery addresses.</p>
             <a href="{{ url_for('manage_address') }}">
                 Open
             </a>
         </div>
 
-        <!-- My Parcels -->
         <div class="service-card">
-            <i class="fas fa-box"></i>
+            <i class="fas fa-box" style="color: #5b2c90; font-size: 2em; margin-bottom: 10px;"></i>
             <h3>My Parcels</h3>
-
-            <p>View all your current parcel requests.</p>
-
+            <p>View all your parcel requests.</p>
             <a href="{{ url_for('my_parcels') }}">
                 Open
             </a>
@@ -59,8 +47,8 @@
 
     <br>
 
-    <a href="{{ url_for('user_dashboard') }}">
-        Back to Dashboard
+    <a href="{{ url_for('user_dashboard') }}" style="display: inline-block; margin-top: 20px; font-weight: bold; color: #5b2c90; text-decoration: none;">
+        <i class="fas fa-arrow-left" style="margin-right: 5px;"></i> Back to Dashboard
     </a>
 
 </div>

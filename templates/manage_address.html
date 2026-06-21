@@ -3,62 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Addresses</title>
+    <title>Manage Address</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
-
 <div class="services-container">
 
-    <h1>Manage Addresses</h1>
+    <h1>Manage Address</h1>
+    <p>View or update your delivery destination below.</p>
 
     <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
         
-        <h3>Add New Address</h3>
-        <form action="{{ url_for('manage_address') }}" method="POST">
+        <h3>Your Delivery Address</h3>
+        
+        <form action="{{ url_for('manage_address') }}" method="POST" style="max-width: 100%; padding: 0; box-shadow: none;">
             
-            <label for="address_label">Address Label</label><br>
+            <label for="address_label">Address Label</label>
             <input type="text" 
                    id="address_label" 
                    name="address_label" 
-                   placeholder="e.g., Home, Velvet Suites, Strathmore Campus" 
-                   required 
-                   style="width: 100%; margin-top: 5px;"><br><br>
+                   placeholder="e.g., Home, Velvet Suites, Office" 
+                   value="{{ address.address_label if address else '' }}"
+                   required>
 
-            <label for="full_address">Full Address</label><br>
-            <textarea id="full_address" 
-                      name="full_address" 
-                      rows="3" 
-                      placeholder="Enter the complete address" 
-                      required 
-                      style="width: 100%; margin-top: 5px;"></textarea><br><br>
+            <label for="full_address">Full Address Details</label>
+            <input type="text" 
+                   id="full_address" 
+                   name="full_address" 
+                   placeholder="Enter the complete address street and details" 
+                   value="{{ address.full_address if address else '' }}"
+                   required>
 
-            <button type="submit" style="width: 100%;">Save Address</button>
+            <button type="submit">
+                <i class="fas fa-save" style="margin-right: 8px;"></i> Save Address Changes
+            </button>
 
         </form>
 
     </div>
 
-    <br>
-
-    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
-        <h3>Saved Addresses</h3>
-        
-        {% if addresses %}
-            <ul>
-            {% for addr in addresses %}
-                <li style="margin-bottom: 10px;">
-                    <strong>{{ addr.address_label }}</strong>: {{ addr.full_address }}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>You have no saved addresses yet.</p>
-        {% endif %}
+    <br><br>
+    <div style="text-align: center;">
+        <a href="{{ url_for('parcel_services') }}">
+            <i class="fas fa-arrow-left"></i> Back to Parcel Services
+        </a>
     </div>
-
-    <br>
-    <a href="{{ url_for('parcel_services') }}">Back to Parcel Services</a>
 
 </div>
 
