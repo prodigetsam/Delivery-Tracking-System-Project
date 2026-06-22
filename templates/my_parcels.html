@@ -6,7 +6,6 @@
     <title>My Parcels</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
 </head>
 <body>
 
@@ -14,7 +13,7 @@
     <h1>My Requested Parcels</h1>
     <p>Track the status of the items you have requested for delivery.</p>
 
-    <div style="margin-bottom: 25px; text-align: left;">
+    <div class="nav-back-container">
         <a href="{{ url_for('parcel_services') }}">
             <i class="fas fa-arrow-left"></i> Back to Services
         </a>
@@ -23,6 +22,11 @@
     <div class="parcel-grid">
         {% for parcel in parcels %}
             <div class="parcel-card">
+                <div class="parcel-image-wrapper">
+                    <img src="{{ url_for('static', filename='uploads/' + parcel.image_filename) if parcel.image_filename else url_for('static', filename='uploads/default_parcel.jpg') }}" 
+                         alt="{{ parcel.item_name }}" class="parcel-thumbnail">
+                </div>
+
                 <div>
                     <span class="status-badge">
                         <i class="fas fa-box"></i> {{ parcel.status }}
@@ -39,10 +43,10 @@
                 </div>
             </div>
         {% else %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 30px; background: #fff; border-radius: 8px; border: 1px solid #ddd;">
-                <i class="fas fa-box-open" style="font-size: 3rem; color: #ccc; margin-bottom: 15px;"></i>
-                <p style="color: #666; font-size: 1.1rem;">You have no parcel requests.</p>
-                <a href="{{ url_for('request_delivery') }}" class="btn" style="margin-top: 15px; display: inline-block;">
+            <div class="no-parcels-msg">
+                <i class="fas fa-box-open"></i>
+                <p>You have no parcel requests.</p>
+                <a href="{{ url_for('request_delivery') }}" class="btn">
                     Browse Inventory
                 </a>
             </div>

@@ -13,11 +13,11 @@
     <h1>Manage Address</h1>
     <p>View or update your delivery destination below.</p>
 
-    <div class="service-card" style="max-width: 500px; margin: 0 auto; text-align: left;">
+    <div class="service-card address-card">
         
         <h3>Your Delivery Address</h3>
         
-        <form action="{{ url_for('manage_address') }}" method="POST" style="max-width: 100%; padding: 0; box-shadow: none;">
+        <form action="{{ url_for('manage_address') }}" method="POST" class="address-form">
             
             <label for="address_label">Address Label</label>
             <input type="text" 
@@ -35,16 +35,15 @@
                    value="{{ address.full_address if address else '' }}"
                    required>
 
-            <button type="submit">
-                <i class="fas fa-save" style="margin-right: 8px;"></i> Save Address Changes
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Save Address Changes
             </button>
 
         </form>
 
     </div>
 
-    <br><br>
-    <div style="text-align: center;">
+    <div class="back-link-container">
         <a href="{{ url_for('parcel_services') }}">
             <i class="fas fa-arrow-left"></i> Back to Parcel Services
         </a>

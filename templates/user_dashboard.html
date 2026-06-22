@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='mystyle.css') }}">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
 
@@ -18,8 +14,7 @@
     <h1>User Dashboard</h1>
 
     <p>
-        Welcome,
-        <strong>{{ session['first_name'] }} {{ session['last_name'] }}</strong>
+        Welcome, <strong>{{ session['first_name'] }}</strong>
     </p>
 
     <div class="dashboard-cards">
@@ -28,28 +23,30 @@
             <i class="fas fa-user"></i>
             <h3>Profile</h3>
             <p>View and manage your account information.</p>
-            <a href="{{ url_for('profile') }}">Open</a><br><br><br>
+            <a href="{{ url_for('profile') }}" class="card-link">Open</a>
         </div>
 
         <div class="dashboard-card">
             <i class="fas fa-box"></i>
             <h3>Parcel Services</h3>
             <p>Request deliveries, manage addresses, and view your parcels.</p>
-            <a href="{{ url_for('parcel_services') }}">Open</a><br><br><br>
+            <a href="{{ url_for('parcel_services') }}" class="card-link">Open</a>
         </div>
 
         <div class="dashboard-card">
             <i class="fas fa-search"></i>
             <h3>Tracking</h3>
             <p>Track parcels and view the history of specific parcels.</p>
-            <a href="{{ url_for('tracking') }}">Open</a><br><br><br>
+            <a href="{{ url_for('tracking') }}" class="card-link">Open</a>
         </div>
 
     </div>
 
-    <a class="logout-btn" href="{{ url_for('logout') }}">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
+    <div class="logout-wrapper">
+        <a class="logout-btn" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
 
 </div>
 

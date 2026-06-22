@@ -1,24 +1,51 @@
+# ==========================================
+# IMPORTS
+# ==========================================
+# Standard Library
 import os
 import uuid
+
+# Third-Party Libraries
 from flask import Flask, render_template, request, redirect, url_for, session
-from werkzeug.security import generate_password_hash, check_password_hash
-from db_connection import get_db_connection
-from parcel_engine import ParcelSystemEngine
 from flask_session import Session
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
-# Add these lines after your app configuration
+# Local Modules
+from db_connection import get_db_connection
+from structures import MyQueue, StatusMapper, UserStack, BinarySearchUser, BinarySearchParcel
 
-
+# ==========================================
+# APP INITIALIZATION & CONFIGURATION
+# ==========================================
 app = Flask(__name__)
-app.config["SESSION_TYPE"] = "filesystem" # Or "sqlalchemy" if you want to store in DB
+app.config["SESSION_TYPE"] = "filesystem" 
 Session(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "fallback_dev_key_change_in_production")
-engine = ParcelSystemEngine()
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# ==========================================
+# CUSTOM DATA STRUCTURES INITIALIZATION
+# ==========================================
+status_mapper = StatusMapper() 
+binary_search_user = BinarySearchUser()
+binary_search_parcel = BinarySearchParcel()
+
+# ==========================================
+# UTILITY FUNCTIONS
+# ==========================================
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def js_alert_redirect(message, url):
     return f"<script>alert('{message}'); window.location.href='{url}';</script>"
 
-
+# ==========================================
+# AUTHENTICATION ROUTES
+# ==========================================
 @app.route("/")
 def login_page():
     return render_template("login.html")
@@ -32,15 +59,17 @@ def login_process():
     cursor = conn.cursor(dictionary=True, buffered=True) 
 
     try:
-        cursor.execute("SELECT id, password, role FROM user_credentials WHERE email = %s", (email,))
+        cursor.execute("SELECT id,first_name, last_name, password, role FROM user_credentials WHERE email = %s", (email,))
         user = cursor.fetchone()
 
         if user and check_password_hash(user["password"], password_raw):
-            session.clear() # IMPORTANT: Wipes all old data (including Admin names)
+            session.clear()
             session.update({
                 "logged_in": True,
                 "user_id": user["id"],
-                "role": user["role"]
+                "role": user["role"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"]
             })
             
             if user["role"] == "admin":
@@ -94,19 +123,14 @@ def logout():
     session.clear()
     return js_alert_redirect("You have been logged out.", url_for("login_page"))
 
-
+# ==========================================
+# USER PROFILE & ACCOUNT ROUTES
+# ==========================================
 @app.route("/dashboard")
 def user_dashboard():
     if not session.get("logged_in"):
         return redirect(url_for("login_page"))
     return render_template("user_dashboard.html")
-
-@app.route("/admin_dashboard")
-def admin_dashboard():
-    if not session.get("logged_in") or session.get("role") != "admin":
-        return redirect(url_for("login_page"))
-    return render_template("admin_dashboard.html")
-
 
 @app.route('/profile')
 def profile():
@@ -190,57 +214,6 @@ def change_password():
         cursor.close()
         conn.close()
 
-
-@app.route('/parcel_services')
-def parcel_services():
-    return render_template('parcel_services.html')
-
-@app.route("/request_delivery", methods=["GET", "POST"])
-def request_delivery():
-    if not session.get("logged_in"):
-        return redirect(url_for("login_page"))
-
-    user_id = session.get("user_id")
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    if request.method == "POST":
-        selected_parcel_id = request.form.get("parcel_id")
-        try:
-            cursor.execute("SELECT full_address FROM addresses WHERE user_id = %s LIMIT 1", (user_id,))
-            address_record = cursor.fetchone()
-            current_address = address_record["full_address"] if address_record else "No primary address configured"
-            new_tracking = "TRK-" + str(uuid.uuid4().hex[:8]).upper()
-
-            # Insert into delivery_requests
-            cursor.execute(
-            "INSERT INTO delivery_requests (parcel_id, tracking_number, status, delivery_address, user_id) VALUES (%s, %s, 'Pending Processing', %s, %s)", 
-            (selected_parcel_id, new_tracking, current_address, user_id)
-            )
-            
-            # Insert into tracking_history (Included parcel_id to satisfy DB schema requirements)
-            cursor.execute(
-                "INSERT INTO tracking_history (parcel_id, tracking_number, status, location, remarks) VALUES (%s, %s, %s, %s, %s)", 
-                (selected_parcel_id, new_tracking, "Pending Processing", "Sorting Hub", "User requested delivery.")
-            )
-            
-            conn.commit()
-            return js_alert_redirect("Delivery request submitted successfully!", url_for("parcel_services"))
-        except Exception as e:
-            conn.rollback() 
-            print(f"REQUEST DELIVERY ERROR: {e}")
-            return js_alert_redirect("An error occurred. Check your server logs.", url_for("request_delivery"))
-        finally:
-            cursor.close()
-            conn.close()
-
-    try:
-        cursor.execute("SELECT id, item_name, description, price FROM parcels ORDER BY item_name ASC")
-        return render_template("request_delivery.html", admin_parcels=cursor.fetchall())
-    finally:
-        cursor.close()
-        conn.close()
-
 @app.route("/manage_address", methods=["GET", "POST"])
 def manage_address():
     if not session.get("logged_in"):
@@ -275,6 +248,56 @@ def manage_address():
         cursor.close()
         conn.close()
 
+# ==========================================
+# PARCEL & TRACKING ROUTES (USER)
+# ==========================================
+@app.route('/parcel_services')
+def parcel_services():
+    return render_template('parcel_services.html')
+
+@app.route("/request_delivery", methods=["GET", "POST"])
+def request_delivery():
+    if not session.get("logged_in"):
+        return redirect(url_for("login_page"))
+
+    user_id = session.get("user_id")
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == "POST":
+        selected_parcel_id = request.form.get("parcel_id")
+        try:
+            # Fetch address ID, not the string
+            cursor.execute("SELECT id FROM addresses WHERE user_id = %s LIMIT 1", (user_id,))
+            address_record = cursor.fetchone()
+            
+            if not address_record:
+                return js_alert_redirect("No address configured. Please set one first.", url_for("manage_address"))
+            
+            selected_address_id = address_record["id"]
+            new_tracking = "TRK-" + str(uuid.uuid4().hex[:8]).upper()
+
+            # Insert using address_id
+            cursor.execute(
+                "INSERT INTO delivery_requests (parcel_id, tracking_number, status, address_id, user_id) VALUES (%s, %s, 'Pending Processing', %s, %s)", 
+                (selected_parcel_id, new_tracking, selected_address_id, user_id)
+            )
+            
+            cursor.execute(
+                "INSERT INTO tracking_history (parcel_id, tracking_number, status, location, remarks) VALUES (%s, %s, %s, %s, %s)", 
+                (selected_parcel_id, new_tracking, "Pending Processing", "Sorting Hub", "User requested delivery.")
+            )
+            
+            conn.commit()
+            return js_alert_redirect("Delivery request submitted successfully!", url_for("parcel_services"))
+        except Exception as e:
+            conn.rollback()
+            print(f"REQUEST DELIVERY ERROR: {e}")
+            return js_alert_redirect("An error occurred. Please try again.", url_for("request_delivery"))
+        finally:
+            cursor.close()
+            conn.close()
+
 @app.route("/my_parcels")
 def my_parcels():
     if not session.get("logged_in"):
@@ -284,21 +307,21 @@ def my_parcels():
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # Join addresses on the new address_id column
         cursor.execute("""
-            SELECT p.item_name, p.description, p.price, dr.tracking_number, dr.status, dr.delivery_address 
+            SELECT p.item_name, p.description, p.price, p.image_filename, 
+                   dr.tracking_number, dr.status, a.address_label as delivery_address 
             FROM parcels p
             JOIN delivery_requests dr ON p.id = dr.parcel_id
+            JOIN addresses a ON dr.address_id = a.id
             WHERE dr.user_id = %s
             ORDER BY dr.id DESC
         """, (session.get("user_id"),))
+        
         return render_template("my_parcels.html", parcels=cursor.fetchall())
-    except Exception as e:
-        print(f"MY PARCELS ERROR: {e}")
-        return js_alert_redirect("An error occurred while fetching your parcels.", url_for("parcel_services"))
     finally:
         cursor.close()
         conn.close()
-
 
 @app.route('/tracking')
 def tracking():
@@ -307,18 +330,35 @@ def tracking():
 @app.route("/track_parcel", methods=["POST"])
 def track_parcel():
     tracking_number = request.form.get("tracking_number") 
+    target_user_id = request.form.get("target_user_id") # Grab this first!
     
+    # Check if the logged-in session is an admin
+    is_admin = (session.get("role") == "admin")
+    
+    # Define fallback redirect destinations dynamically based on who is tracking
+    if is_admin:
+        if target_user_id == "global":
+            fallback_url = url_for("admin_dashboard")
+        elif target_user_id:
+            fallback_url = url_for("user_statistics", target_user_id=target_user_id)
+        else:
+            fallback_url = url_for("user_management")
+    else:
+        fallback_url = url_for("tracking")
+
     if not tracking_number:
-        return js_alert_redirect("Please enter a valid tracking number.", url_for("tracking"))
+        return js_alert_redirect("Please enter a valid tracking number.", fallback_url)
     
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
     try:
         cursor.execute("""
-            SELECT p.id as parcel_id, p.item_name, p.description, p.price, dr.tracking_number, dr.status, dr.delivery_address 
+            SELECT p.id as parcel_id, p.item_name, p.description, p.price, 
+                   dr.tracking_number, dr.status, a.address_label as delivery_address 
             FROM delivery_requests dr
             JOIN parcels p ON dr.parcel_id = p.id
+            LEFT JOIN addresses a ON dr.user_id = a.user_id
             WHERE dr.tracking_number = %s
         """, (tracking_number,))
         parcel = cursor.fetchone()
@@ -329,16 +369,32 @@ def track_parcel():
             
             parcel["history"] = history
             parcel["current_location"] = history[0]["location"] if history else "Sorting Hub"
-            return render_template("tracking_result.html", parcel=parcel)
+            
+            return render_template(
+                "tracking_result.html", 
+                parcel=parcel, 
+                is_admin=is_admin, 
+                target_user_id=target_user_id
+            )
         
-        return js_alert_redirect("Parcel not found. Please check the tracking number.", url_for("tracking"))
+        # ---> FIXED: Returns the admin or user to their respective page if parcel doesn't exist <---
+        return js_alert_redirect("Parcel not found. Please check the tracking number.", fallback_url)
     except Exception as e:
         print(f"TRACKING SYSTEM ERROR: {e}")
-        return js_alert_redirect("An error occurred while retrieving tracking details.", url_for("tracking"))
+        # ---> FIXED: Returns the admin or user to their respective page if an exception is thrown <---
+        return js_alert_redirect("An error occurred while retrieving tracking details.", fallback_url)
     finally:
         cursor.close()
         conn.close()
 
+# ==========================================
+# ADMIN ROUTES
+# ==========================================
+@app.route("/admin_dashboard")
+def admin_dashboard():
+    if not session.get("logged_in") or session.get("role") != "admin":
+        return redirect(url_for("login_page"))
+    return render_template("admin_dashboard.html")
 
 @app.route("/admin/create_parcel", methods=["GET", "POST"])
 def admin_create_parcel():
@@ -350,12 +406,35 @@ def admin_create_parcel():
         cursor = conn.cursor()
 
         try:
+            # 1. Handle the file upload segment
+            image_filename = 'default_parcel.jpg'  # Fallback default if nothing is uploaded
+            
+            if 'parcel_image' in request.files:
+                file = request.files['parcel_image']
+                # If user selected a file and it has an approved extension
+                if file and file.filename != '' and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    
+                    # Ensure the physical storage directory exists to avoid OS write errors
+                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    
+                    # Save the file to static/uploads/
+                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    image_filename = filename
+
+            # 2. Execute the query with the new image_filename column
             cursor.execute(
-            "INSERT INTO parcels (item_name, description, price) VALUES (%s, %s, %s)", 
-            (request.form.get("item_name").strip(), request.form.get("description", "").strip(), request.form.get("price"))
+                "INSERT INTO parcels (item_name, description, price, image_filename) VALUES (%s, %s, %s, %s)", 
+                (
+                    request.form.get("item_name").strip(), 
+                    request.form.get("description", "").strip(), 
+                    request.form.get("price"),
+                    image_filename
+                )
             )
             conn.commit()
             return js_alert_redirect("Parcel added to inventory pool.", url_for("admin_dashboard"))
+            
         except Exception as e:
             print(f"ADMIN PARCEL ENGINE ERROR: {e}")
             return js_alert_redirect("Failed to log parcel. Check your inputs.", url_for("admin_create_parcel"))
@@ -378,12 +457,54 @@ def user_management():
     search_result = None
 
     try:
-        if searched:
-            cursor.execute("SELECT * FROM user_credentials WHERE first_name = %s LIMIT 1", (search_query,))
-            search_result = cursor.fetchone()
+        # Updated JOIN: Selecting a.id allows you to reference the address specifically
+        cursor.execute("""
+            SELECT u.id, u.first_name, u.last_name, u.sex, u.email, u.created_at, 
+                   a.address_label, a.id as address_id
+            FROM user_credentials u
+            LEFT JOIN addresses a ON u.id = a.user_id
+            WHERE u.role != 'admin' 
+            ORDER BY u.id ASC
+        """)
+        db_users = cursor.fetchall()
 
-        cursor.execute("SELECT id, first_name, last_name, sex, email FROM user_credentials WHERE role != 'admin' ORDER BY first_name ASC")
-        return render_template("user_management.html", users=cursor.fetchall(), search_query=search_query, searched=searched, search_result=search_result)
+        # ---> BINARY SEARCH ALGORITHM INTEGRATION <---
+        if searched:
+            searchable_pool = list(db_users)
+            searchable_pool.sort(key=lambda x: str(x["first_name"]).lower())
+            search_result = BinarySearchUser.binary_search_users(searchable_pool, search_query)
+
+        # ---> COMPUTE AGGREGATE SUMMARY REPORTS LOGIC <---
+        total_users = len(db_users)
+        male_count = sum(1 for u in db_users if str(u["sex"]).lower() in ["male", "m"])
+        female_count = sum(1 for u in db_users if str(u["sex"]).lower() in ["female", "f"])
+        other_count = total_users - (male_count + female_count)
+
+        user_report = {
+            "total": total_users,
+            "males": male_count,
+            "females": female_count,
+            "others": other_count
+        }
+
+        # ---> STACK IMPLEMENTATION <---
+        user_stack = UserStack()
+        for user in db_users:
+            user_stack.push(user)
+
+        if request.args.get("order") == "oldest":
+            display_users = user_stack.reverse_order()
+        else:
+            display_users = user_stack.get_all()
+
+        return render_template(
+            "user_management.html", 
+            users=display_users, 
+            search_query=search_query, 
+            searched=searched, 
+            search_result=search_result,
+            report=user_report
+        )
     except Exception as e:
         print(f"USER MANAGEMENT ERROR: {e}")
         return js_alert_redirect("Error loading user management.", url_for("admin_dashboard"))
@@ -437,7 +558,6 @@ def report_summary():
         conn.close()
 
 @app.route("/admin/parcels", methods=["GET", "POST"])
-@app.route("/admin/parcels", methods=["GET", "POST"])
 def parcel_management():
     if not session.get("logged_in") or session.get("role") != "admin":
         return redirect(url_for("login_page"))
@@ -449,7 +569,11 @@ def parcel_management():
         if request.method == "POST":
             parcel_id = request.form.get("parcel_id")
             tracking_number = request.form.get("tracking_number")
-            next_status, location = engine.get_next_pipeline_stage(request.form.get("current_status"))
+            current_status = request.form.get("current_status")
+            
+            # ---> HASH MAP IMPLEMENTATION IN ACTION <---
+            next_status = status_mapper.get_next_status(current_status)
+            location = status_mapper.get_location(next_status)
             
             # Update delivery_requests status
             if tracking_number:
@@ -457,7 +581,7 @@ def parcel_management():
             else:
                 cursor.execute("UPDATE delivery_requests SET status = %s WHERE parcel_id = %s", (next_status, parcel_id))
             
-            # Insert into tracking_history (Included parcel_id to satisfy DB schema)
+            # Insert into tracking_history
             cursor.execute(
                 "INSERT INTO tracking_history (parcel_id, tracking_number, status, location, remarks) VALUES (%s, %s, %s, %s, %s)", 
                 (parcel_id, tracking_number, next_status, location, "Transitioned to next stage by admin.")
@@ -466,16 +590,28 @@ def parcel_management():
             conn.commit()
             return js_alert_redirect(f"Status moved to {next_status}.", url_for("parcel_management"))
 
+        # GET Request: Fetch pipeline
         cursor.execute("""
-            SELECT p.id as parcel_id, p.item_name, dr.tracking_number, dr.delivery_address, dr.status, u.first_name, u.last_name,
-                   COALESCE((SELECT th.location FROM tracking_history th WHERE th.tracking_number = dr.tracking_number ORDER BY th.id DESC LIMIT 1), 'Sorting Hub') as current_location
+            SELECT p.id as parcel_id, p.item_name, dr.tracking_number, 
+                   a.address_label as delivery_address, dr.status, 
+                   u.first_name, u.last_name,
+                   COALESCE((SELECT th.location FROM tracking_history th 
+                             WHERE th.tracking_number = dr.tracking_number 
+                             ORDER BY th.id DESC LIMIT 1), 'Sorting Hub') as current_location
             FROM delivery_requests dr
             JOIN parcels p ON dr.parcel_id = p.id
             JOIN user_credentials u ON dr.user_id = u.id
+            JOIN addresses a ON dr.address_id = a.id
             WHERE dr.status IN ('Pending Processing', 'In Transit', 'Out for Delivery')
-            ORDER BY dr.id ASC
         """)
-        return render_template("parcel_management.html", pipeline=cursor.fetchall())
+        raw_pipeline = cursor.fetchall()
+        
+        # ---> QUEUE IMPLEMENTATION IN ACTION <---
+        pipeline_queue = MyQueue()
+        for item in raw_pipeline:
+            pipeline_queue.enqueue(item)
+            
+        return render_template("parcel_management.html", pipeline=pipeline_queue.get_all())
     except Exception as e:
         conn.rollback()
         print(f"ADMIN MANAGEMENT ERROR: {e}")
@@ -513,5 +649,73 @@ def cancel_parcel():
     finally:
         cursor.close()
         conn.close()
+
+@app.route("/admin/user_statistics/<int:target_user_id>", methods=["GET"])
+def user_statistics(target_user_id):
+    if not session.get("logged_in") or session.get("role") != "admin":
+        return redirect(url_for("login_page"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # 1. Fetch targeted user profile details
+        cursor.execute("SELECT id, first_name, last_name, email, sex FROM user_credentials WHERE id = %s", (target_user_id,))
+        user_profile = cursor.fetchone()
+        
+        if not user_profile:
+            return js_alert_redirect("User profile not found.", url_for("user_management"))
+
+        # 2. Extract every parcel transaction linked to this customer account, pulling the clean label address
+        cursor.execute("""
+            SELECT d.tracking_number, d.status, a.address_label AS delivery_address, p.item_name, p.price 
+            FROM delivery_requests d
+            JOIN parcels p ON d.parcel_id = p.id
+            LEFT JOIN addresses a ON d.user_id = a.user_id
+            WHERE d.user_id = %s
+        """, (target_user_id,))
+        user_history = cursor.fetchall()
+
+        # 3. COMPUTE STATISTICS DIRECTLY IN-LINE (No extra class needed)
+        total_parcels = len(user_history)
+        total_spent = 0.0
+        status_counts = {}
+
+        for request in user_history:
+            # Aggregate expenditures safely by casting price to a float
+            price_val = request.get("price")
+            if price_val is not None:
+                try:
+                    total_spent += float(price_val)
+                except ValueError:
+                    pass
+            
+            # Count status distributions dynamically
+            status = request.get("status", "Unknown")
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        # Package the statistics up into a clean dictionary for the template
+        stats_summary = {
+            "total_parcels": total_parcels,
+            "total_spent": total_spent,
+            "status_breakdown": status_counts
+        }
+
+        return render_template(
+            "user_statistics.html",
+            profile=user_profile,
+            history=user_history,
+            stats=stats_summary
+        )
+    except Exception as e:
+        print(f"ANALYTICS ENGINE ERROR: {e}")
+        return js_alert_redirect("Error processing profile analytics.", url_for("user_management"))
+    finally:
+        cursor.close()
+        conn.close()
+
+# ==========================================
+# MAIN EXECUTION
+# ==========================================
 if __name__ == "__main__":
     app.run(debug=True)

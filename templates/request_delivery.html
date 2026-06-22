@@ -13,31 +13,71 @@
     <h1>Request Delivery</h1>
     <p>Select from the available parcels below.</p>
 
-    <div style="margin-bottom: 25px; text-align: left;">
-        <a href="{{ url_for('parcel_services') }}">
-            <i class="fas fa-arrow-left"></i> Back to Services
-        </a>
+    <div class="controls-container">
+        <div class="navigation-wrapper">
+            <a href="{{ url_for('parcel_services') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Services
+            </a>
+        </div>
+        
+        <h2>Available Items Pool</h2>
+
+        <div class="search-wrapper">
+            <form action="{{ url_for('request_delivery') }}" method="GET" class="search-form">
+                <input type="text" name="search_query" value="{{ search_query or '' }}" placeholder="Search exact parcel name..." class="search-input">
+                <button type="submit" class="sort-filter-btn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                {% if search_query %}
+                    <a href="{{ url_for('request_delivery') }}" class="clear-filter-btn">
+                        <i class="fas fa-times-circle"></i> Clear Search
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="sorting-wrapper">
+            {% if request.args.get('sort') == 'price' %}
+                <a href="{{ url_for('request_delivery') }}" class="clear-filter-btn">
+                    <i class="fas fa-times-circle"></i> Clear Filter
+                </a>
+            {% else %}
+                <a href="{{ url_for('request_delivery', sort='price', search_query=search_query) }}" class="sort-filter-btn">
+                    <i class="fas fa-sort-amount-up-alt"></i> Sort by Price (Low to High)
+                </a>
+            {% endif %}
+        </div>
     </div>
 
     <div class="parcel-grid">
         {% for parcel in admin_parcels %}
             <div class="parcel-card">
-                <div>
+                
+                <div class="parcel-image-wrapper">
+                    <img src="{{ url_for('static', filename='uploads/' + parcel.image_filename) if parcel.image_filename else url_for('static', filename='uploads/default_parcel.png') }}" 
+                         alt="{{ parcel.item_name }}" 
+                         class="parcel-thumbnail">
+                </div>
+
+                <div class="parcel-details">
                     <h3>{{ parcel.item_name }}</h3>
                     <div class="parcel-price">Price: KES {{ parcel.price }}</div>
-                    <p class="parcel-desc"><h3>Description:</h3> {{ parcel.description }}</p>
+                    <div class="parcel-desc">
+                        <h4>Description:</h4> 
+                        <p>{{ parcel.description }}</p>
+                    </div>
                 </div>
                 
-                <form action="/request_delivery" method="POST">
+                <form action="/request_delivery" method="POST" class="delivery-request-form">
                     <input type="hidden" name="parcel_id" value="{{ parcel.id }}">
-                    <button type="submit">
+                    <button type="submit" class="submit-btn">
                         <i class="fas fa-paper-plane"></i> Request Delivery
                     </button>
                 </form>
             </div>
         {% else %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #888;">
-                <p>No available parcels for delivery currently.</p>
+            <div class="no-parcels-fallback">
+                <p>No available parcels matched your selection or criteria.</p>
             </div>
         {% endfor %}
     </div>

@@ -1,6 +1,5 @@
-CREATE  DATABASE IF NOT EXISTS delivery_tracking_system;
-USE delivery_tracking_system;
-CREATE TABLE user_credentials (
+-- 1. User Credentials
+CREATE TABLE IF NOT EXISTS user_credentials (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -11,7 +10,8 @@ CREATE TABLE user_credentials (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE addresses (
+-- 2. Addresses (Relational structure)
+CREATE TABLE IF NOT EXISTS addresses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     address_label VARCHAR(255) NOT NULL,
@@ -19,30 +19,32 @@ CREATE TABLE addresses (
     FOREIGN KEY (user_id) REFERENCES user_credentials(id) ON DELETE CASCADE
 );
 
-
-CREATE TABLE parcels (
+-- 3. Parcels (Contains price and description)
+CREATE TABLE IF NOT EXISTS parcels (
     id INT AUTO_INCREMENT PRIMARY KEY,
     item_name VARCHAR(255) NOT NULL,
-    weight_kg DECIMAL(5,2), -- Optional: Add details as needed
-    dimensions VARCHAR(50), -- Optional: Add details as needed
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    description TEXT,
+    price DECIMAL(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    image_filename VARCHAR(255) DEFAULT 'default_parcel.jpg'
 );
 
-
-CREATE TABLE delivery_requests (
+-- 4. Delivery Requests (Linked to Parcels and Addresses)
+CREATE TABLE IF NOT EXISTS delivery_requests (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     parcel_id INT NOT NULL,
     tracking_number VARCHAR(50) NOT NULL UNIQUE,
-    delivery_address VARCHAR(255) NOT NULL,
     status VARCHAR(50) DEFAULT 'Pending Processing',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    address_id INT, -- Linked to the addresses table
     FOREIGN KEY (user_id) REFERENCES user_credentials(id) ON DELETE CASCADE,
-    FOREIGN KEY (parcel_id) REFERENCES parcels(id) ON DELETE CASCADE
+    FOREIGN KEY (parcel_id) REFERENCES parcels(id) ON DELETE CASCADE,
+    FOREIGN KEY (address_id) REFERENCES addresses(id) ON DELETE SET NULL
 );
 
-
-CREATE TABLE tracking_history (
+-- 5. Tracking History
+CREATE TABLE IF NOT EXISTS tracking_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     parcel_id INT NOT NULL,
     tracking_number VARCHAR(50) NOT NULL,
@@ -53,5 +55,3 @@ CREATE TABLE tracking_history (
     FOREIGN KEY (parcel_id) REFERENCES parcels(id) ON DELETE CASCADE,
     FOREIGN KEY (tracking_number) REFERENCES delivery_requests(tracking_number) ON DELETE CASCADE
 );
-ALTER TABLE delivery_requests ADD COLUMN price DECIMAL(10,2) AFTER status;
-ALTER TABLE parcels ADD COLUMN description TEXT AFTER item_name;
