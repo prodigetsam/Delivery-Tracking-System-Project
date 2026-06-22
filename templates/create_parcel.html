@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Authorized Parcel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="services-container">
+
+    <h1>Create a parcel</h1>
+    <p>Pre-configure an official system parcel record here so users can claim it.</p>
+
+    <div class="service-card">
+        
+        <h3>Initialize Parcel File</h3>
+        
+        <form action="{{ url_for('admin_create_parcel') }}" method="POST" enctype="multipart/form-data" class="parcel-form">
+            
+            <label for="item_name">Parcel Item Name</label>
+            <input type="text" id="item_name" name="item_name" 
+                   placeholder="e.g., Lenovo Laptop ThinkPad" required>
+
+            <label for="description">Detailed Description</label>
+            <textarea id="description" name="description" rows="3" 
+                      placeholder="e.g., Core i7, 16GB RAM, Black finish" required></textarea>
+
+            <label for="price">Estimated Value (KES)</label>
+            <input type="number" id="price" name="price" step="0.01" 
+                   placeholder="0.00" required>
+
+            <label for="parcel_image">Parcel Condition Image / Photo</label>
+            <input type="file" id="parcel_image" name="parcel_image" accept="image/*" class="file-input-field">
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-plus-circle"></i> Initialize Parcel Record
+            </button>
+
+        </form>
+    </div>
+
+    <div class="dashboard-return-link">
+        <a href="{{ url_for('admin_dashboard') }}">
+            <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

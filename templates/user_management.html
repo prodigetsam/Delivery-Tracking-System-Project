@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="profile-container">
+
+    <h1>User Control Center</h1>
+    <div class="nav-back-container">
+        <a href="/admin_dashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i> Return to Admin Dashboard
+        </a>
+    </div>
+
+    <div class="report-summary-container">
+        <div class="report-card total-users-card">
+            <div class="report-label">Total Users</div>
+            <div class="report-value"><i class="fas fa-users"></i> {{ report.total }}</div>
+        </div>
+
+        <div class="report-card male-users-card">
+            <div class="report-label">Male Accounts</div>
+            <div class="report-value"><i class="fas fa-mars"></i> {{ report.males }}</div>
+        </div>
+
+        <div class="report-card female-users-card">
+            <div class="report-label">Female Accounts</div>
+            <div class="report-value"><i class="fas fa-venus"></i> {{ report.females }}</div>
+        </div>
+
+        {% if report.others > 0 %}
+        <div class="report-card other-users-card">
+            <div class="report-label">Other / Unspecified</div>
+            <div class="report-value"><i class="fas fa-genderless"></i> {{ report.others }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="sorting-container">
+        {% if request.args.get('order') == 'oldest' %}
+            <a href="{{ url_for('user_management') }}" class="btn">
+                <i class="fas fa-sort-amount-down"></i> Show Newest Users First
+            </a>
+        {% else %}
+            <a href="{{ url_for('user_management', order='oldest') }}" class="btn">
+                <i class="fas fa-sort-amount-up"></i> Show Oldest Users First
+            </a>
+        {% endif %}
+    </div>
+
+    <form action="/admin/users" method="GET" class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" name="search_query" placeholder="Enter exact First Name to locate via Binary Search..." value="{{ search_query }}">
+        <button type="submit">Search</button>
+        {% if searched %}
+            <a href="/admin/users" class="clear-btn">Clear</a>
+        {% endif %}
+    </form>
+
+    {% if searched %}
+        <h2>Search Result</h2>
+        {% if search_result %}
+            <table class="user-table search-results-table">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Gender</th>
+                        <th>Email Address</th>
+                        <th>Home Address</th>
+                        <th>Date Joined</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlighted-row">
+                        <td><strong>{{ search_result.first_name }}</strong></td>
+                        <td>{{ search_result.last_name }}</td>
+                        <td>{{ search_result.sex }}</td>
+                        <td>{{ search_result.email }}</td>
+                        <td>{{ search_result.address_label or 'No Address Provided' }}</td>
+                        <td>{{ search_result.created_at.strftime('%Y-%m-%d %H:%M') if search_result.created_at else 'N/A' }}</td>
+                        <td>
+                            <form action="/admin/delete_user/{{ search_result.id }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this user?');" class="inline-form">
+                                <button type="submit" class="delete-btn"><i class="fas fa-trash-alt"></i> Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <p class="error-msg"><i class="fas fa-exclamation-circle"></i> No user matching "{{ search_query }}" found.</p>
+        {% endif %}
+    {% endif %}
+
+    <h2>All Registered Users</h2>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Email Address</th>
+                <th>Home Address</th>
+                <th>Date Joined</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><strong>{{ user.first_name }}</strong></td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.sex }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.address_label or 'No Address Provided' }}</td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
+                <td class="action-cell">
+                    <a href="{{ url_for('user_statistics', target_user_id=user.id) }}" class="stats-link">
+                        <i class="fas fa-chart-line"></i> View Statistics
+                    </a>
+                    <form action="/admin/delete_user/{{ user.id }}" method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this user?');" class="inline-form">
+                        <button type="submit" class="delete-btn"><i class="fas fa-trash-alt"></i> Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="no-data-cell">No registered regular clients found in the system database.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

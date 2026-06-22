@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Report Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="profile-container">
+
+    <h1>Logistics Report Summary</h1>
+    <p>Overview of system-wide shipment volumes and delivery statuses.</p>
+
+    <div class="nav-back-container">
+        <a href="/admin_dashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i> Return to Admin Dashboard
+        </a>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Bookings</h3>
+            <p class="number">{{ total_parcels }}</p>
+        </div>
+        
+        <div class="stat-card pending">
+            <h3>Pending Processing</h3>
+            <p class="number">{{ pending_parcels }}</p>
+        </div>
+
+        <div class="stat-card delivered">
+            <h3>Successfully Delivered</h3>
+            <p class="number">{{ delivered_parcels }}</p>
+        </div>
+
+        <div class="stat-card cancelled">
+            <h3>Cancelled Shipments</h3>
+            <p class="number">{{ cancelled_parcels }}</p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

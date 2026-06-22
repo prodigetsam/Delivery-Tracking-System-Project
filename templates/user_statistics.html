@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="profile-container">
+    
+    <div class="back-link-container">
+        <a href="{{ url_for('user_management') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Users Management
+        </a>
+    </div>
+
+    <h1>Profile Insights: {{ profile.first_name }} {{ profile.last_name }}</h1>
+
+    <div class="dashboard-cards">
+        <div class="stat-card">
+            <i class="fas fa-box"></i>
+            <h3>Total delivery requests</h3>
+            <div class="number">{{ stats.total_parcels }}</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-coins"></i>
+            <h3>Total Expenditure</h3>
+            <div class="number">KES {{ "{:,.2f}".format(stats.total_spent) }}</div>
+        </div>
+    </div>
+
+    <div class="profile-card" style="margin-top: 25px; flex-direction: column; align-items: flex-start;">
+        <h3>Request Status Breakdown</h3>
+        <ul style="list-style: none; width: 100%;">
+            {% for status, count in stats.status_breakdown.items() %}
+                <li style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee;">
+                    <span><i class="fas fa-circle-notch"></i> {{ status }}</span>
+                    <span class="status-badge">{{ count }}</span>
+                </li>
+            {% else %}
+                <li>No historical request status configurations logged yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <h3>Comprehensive Order Logs</h3>
+    <table class="management-table">
+        <thead>
+            <tr>
+                <th>Tracking ID</th>
+                <th>Parcel Item Description</th>
+                <th>Destination Label Address</th>
+                <th>Purchased Cost</th>
+                <th>Current Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in history %}
+                <tr>
+                    <td>
+                        <form action="{{ url_for('track_parcel') }}" method="POST">
+                            <input type="hidden" name="tracking_number" value="{{ record.tracking_number }}">
+                            <input type="hidden" name="target_user_id" value="{{ profile.id }}">
+                            <button type="submit" class="back-link">
+                                {{ record.tracking_number }}
+                            </button>
+                        </form>
+                    </td>
+                    <td>{{ record.item_name }}</td>
+                    <td>{{ record.delivery_address }}</td>
+                    <td>KES {{ record.price }}</td>
+                    <td><span class="status-badge">{{ record.status }}</span></td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="no-parcels-msg">This account has not made any delivery request orders.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

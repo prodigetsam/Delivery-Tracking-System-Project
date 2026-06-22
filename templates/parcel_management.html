@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parcel Management Pipeline</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="profile-container">
+
+    <h1>Parcel Management</h1>
+    <p>Review incoming user delivery requests and update their tracking lifecycle queues.</p>
+
+    <div class="nav-back-container">
+        <a href="/admin_dashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Main Dashboard
+        </a>
+    </div>
+
+    <h2>Pending Delivery Requests & Processing Queue</h2>
+    <p>Incoming user shipments stored sequentially for logistical assignment.</p>
+
+    <table class="management-table">
+        <thead>
+            <tr>
+                <th>Tracking No</th>
+                <th>Item Name</th>
+                <th>Recipient & Destination</th>
+                <th>Current Location</th>
+                <th>Current Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parcel in pipeline %}
+            <tr>
+                <td><strong>{{ parcel.tracking_number }}</strong></td>
+                <td>{{ parcel.item_name }}</td>
+                <td>
+                    <strong>{{ parcel.first_name }} {{ parcel.last_name }}</strong><br>
+                    <span class="small-text">{{ parcel.delivery_address }}</span>
+                </td>
+                <td>
+                    <i class="fas fa-map-marker-alt"></i> {{ parcel.current_location }}
+                </td>
+                <td>
+                    <span class="status-badge-admin">{{ parcel.status }}</span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        
+                        {% if parcel.status == 'Out for Delivery' %}
+                            <form action="/admin/parcels" method="POST">
+                                <input type="hidden" name="parcel_id" value="{{ parcel.parcel_id }}">
+                                <input type="hidden" name="tracking_number" value="{{ parcel.tracking_number }}">
+                                <input type="hidden" name="current_status" value="Delivered">
+                                <input type="hidden" name="delivery_address" value="{{ parcel.delivery_address }}"> 
+                                <button type="submit" class="btn btn-outline">
+                                    Complete <i class="fas fa-check-circle"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="/admin/parcels" method="POST">
+                                <input type="hidden" name="parcel_id" value="{{ parcel.parcel_id }}">
+                                <input type="hidden" name="tracking_number" value="{{ parcel.tracking_number }}">
+                                <input type="hidden" name="current_status" value="{{ parcel.status }}">
+                                <input type="hidden" name="delivery_address" value="{{ parcel.delivery_address }}"> 
+                                <button type="submit" class="btn">
+                                    Advance <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <form action="/admin/cancel_parcel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                            <input type="hidden" name="parcel_id" value="{{ parcel.parcel_id }}">
+                            <input type="hidden" name="tracking_number" value="{{ parcel.tracking_number }}">
+                            <button type="submit" class="btn-danger">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    No active user requests are currently waiting in the processing pipeline.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
