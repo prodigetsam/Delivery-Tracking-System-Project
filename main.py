@@ -267,17 +267,18 @@ def request_delivery():
     if request.method == "POST":
         selected_parcel_id = request.form.get("parcel_id")
         try:
-            # Fetch address ID, not the string
+            # Fetch address ID
             cursor.execute("SELECT id FROM addresses WHERE user_id = %s LIMIT 1", (user_id,))
             address_record = cursor.fetchone()
             
             if not address_record:
+                cursor.close()
+                conn.close()
                 return js_alert_redirect("No address configured. Please set one first.", url_for("manage_address"))
             
             selected_address_id = address_record["id"]
             new_tracking = "TRK-" + str(uuid.uuid4().hex[:8]).upper()
 
-            # Insert using address_id
             cursor.execute(
                 "INSERT INTO delivery_requests (parcel_id, tracking_number, status, address_id, user_id) VALUES (%s, %s, 'Pending Processing', %s, %s)", 
                 (selected_parcel_id, new_tracking, selected_address_id, user_id)
@@ -289,15 +290,25 @@ def request_delivery():
             )
             
             conn.commit()
-            return js_alert_redirect("Delivery request submitted successfully!", url_for("parcel_services"))
-        except Exception as e:
-            conn.rollback()
-            print(f"REQUEST DELIVERY ERROR: {e}")
-            return js_alert_redirect("An error occurred. Please try again.", url_for("request_delivery"))
-        finally:
             cursor.close()
             conn.close()
-
+            return js_alert_redirect("Delivery request submitted successfully!", url_for("parcel_services"))
+            
+        except Exception as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            print(f"REQUEST DELIVERY ERROR: {e}")
+            return js_alert_redirect("An error occurred. Please try again.", url_for("request_delivery"))
+            
+    else:
+        # --- THIS WAS MISSING ---
+        # Handle the GET request to display the form
+        cursor.execute("SELECT * FROM parcels") # Adjust query as needed to show selectable parcels
+        available_parcels = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return render_template("request_delivery.html", parcels=available_parcels)
 @app.route("/my_parcels")
 def my_parcels():
     if not session.get("logged_in"):

@@ -58,7 +58,7 @@ class StatusMapper:
         return self.next_status_map.get(current_status, "Delivered")
 
 class UserStack:
-    """Implementation of a Stack Data Structure (LIFO) for User Management."""
+    """Implementation of a Stack Data Structure (Last-in First-Out) for User Management."""
     def __init__(self):
         self.stack = []
 
