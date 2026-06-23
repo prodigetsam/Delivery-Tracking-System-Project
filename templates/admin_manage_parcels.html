@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Parcels</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+<div class="profile-container">
+    
+    <div class="back-link-container">
+        <a href="{{ url_for('admin_dashboard') }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Admin Dashboard
+        </a>
+    </div>
+
+    <h1>Admin: Parcels Management Pool</h1>
+    <p>View, track, or completely remove items from the available global delivery catalog.</p>
+
+    <table class="management-table">
+        <thead>
+            <tr>
+                <th>Thumbnail</th>
+                <th>Parcel Item Name</th>
+                <th>Description</th>
+                <th>Price (KES)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parcel in parcels %}
+                <tr>
+                    <td>
+                        <div class="parcel-image-wrapper">
+                            <img src="{{ url_for('static', filename='uploads/' + parcel.image_filename) if parcel.image_filename else url_for('static', filename='uploads/default_parcel.png') }}" 
+                                 alt="{{ parcel.item_name }}" 
+                                 class="parcel-thumbnail">
+                        </div>
+                    </td>
+                    <td><strong>{{ parcel.item_name }}</strong></td>
+                    <td>{{ parcel.description or 'No description provided.' }}</td>
+                    <td>KES {{ "{:,.2f}".format(parcel.price) if parcel.price else "0.00" }}</td>
+                    <td>
+                        <form action="{{ url_for('admin_delete_parcel') }}" method="POST" onsubmit="return confirm('Are you completely sure you want to permanently delete this parcel? This will also purge linked active delivery requests.');">
+                            <input type="hidden" name="parcel_id" value="{{ parcel.id }}">
+                            <button type="submit" class="btn-danger">
+                                <i class="fas fa-trash-alt"></i> Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="no-parcels-msg">
+                        The global parcels pool is completely empty. Add items first!
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

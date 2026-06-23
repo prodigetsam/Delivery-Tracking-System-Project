@@ -455,6 +455,51 @@ def admin_create_parcel():
 
     return render_template("create_parcel.html")
 
+@app.route("/admin/manage_parcels", methods=["GET"])
+def admin_manage_parcels():
+    # Role gate safety check
+    if not session.get("logged_in") or session.get("role") != "admin":
+        return redirect(url_for("login_page"))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    # Grab all items from the pool
+    cursor.execute("SELECT * FROM parcels ORDER BY id DESC")
+    all_parcels = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+    return render_template("admin_manage_parcels.html", parcels=all_parcels)
+
+
+@app.route("/admin/delete_parcel", methods=["POST"])
+def admin_delete_parcel():
+    # Role gate safety check
+    if not session.get("logged_in") or session.get("role") != "admin":
+        return redirect(url_for("login_page"))
+
+    target_parcel_id = request.form.get("parcel_id")
+    
+    if target_parcel_id:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Delete execution
+            cursor.execute("DELETE FROM parcels WHERE id = %s", (target_parcel_id,))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return js_alert_redirect("Parcel removed successfully from system database!", url_for("admin_manage_parcels"))
+        except Exception as e:
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            print(f"PARCEL DELETION ERROR: {e}")
+            return js_alert_redirect("Could not complete removal process.", url_for("admin_manage_parcels"))
+            
+    return redirect(url_for("admin_manage_parcels"))
+
 @app.route("/admin/users", methods=["GET"])
 def user_management():
     if not session.get("logged_in") or session.get("role") != "admin":
